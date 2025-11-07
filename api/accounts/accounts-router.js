@@ -1,27 +1,63 @@
-const router = require('express').Router()
+const router = require("express").Router();
+const modelFunctions = require("./accounts-model");
+const {
+  checkAccountPayload,
+  checkAccountNameUnique,
+  checkAccountId,
+} = require("./accounts-middleware");
 
-router.get('/', (req, res, next) => {
-  // KODLAR BURAYA
-})
-
-router.get('/:id', (req, res, next) => {
-  // KODLAR BURAYA
-})
-
-router.post('/', (req, res, next) => {
-  // KODLAR BURAYA
-})
-
-router.put('/:id', (req, res, next) => {
-  // KODLAR BURAYA
+router.get("/", async (req, res, next) => {
+  try {
+    res.json(await modelFunctions.getAll());
+  } catch (error) {
+    next(error);
+  }
 });
 
-router.delete('/:id', (req, res, next) => {
-  // KODLAR BURAYA
-})
+router.get("/:id", checkAccountId, (req, res) => {
+  res.json(req.Account);
+});
 
-router.use((err, req, res, next) => { // eslint-disable-line
-  // KODLAR BURAYA
-})
+router.post(
+  "/",
+  checkAccountPayload,
+  checkAccountNameUnique,
+  async (req, res, next) => {
+    try {
+      res.status(201).json(await modelFunctions.create(req.body));
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+router.put(
+  "/:id",
+  checkAccountId,
+  checkAccountPayload,
+  checkAccountNameUnique,
+  async (req, res, next) => {
+    try {
+      res.json(await modelFunctions.updateById(req.params.id, req.body));
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+router.delete("/:id", checkAccountId, async (req, res, next) => {
+  try {
+    await modelFunctions.deleteById(req.params.id);
+    res.json({ message: `${req.Account.name} deleted` });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.use((err, req, res, next) => {
+  res.status(err.status || 500).json({
+    message: err.message,
+  });
+});
 
 module.exports = router;
