@@ -25,8 +25,8 @@ router.post(
   async (req, res, next) => {
     try {
       res.status(201).json(await modelFunctions.create(req.body));
-    } catch (error) {
-      next(error);
+    } catch (err) {
+      next(err);
     }
   }
 );
